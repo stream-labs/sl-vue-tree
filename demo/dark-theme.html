@@ -27,6 +27,7 @@
       <sl-vue-tree
           v-model="nodes"
           ref="slVueTree"
+          :allow-multiselect="true"
           @select="nodeSelected"
           @drop="nodeDropped"
           @toggle="nodeToggled"
@@ -56,6 +57,11 @@
             <i v-if="!node.data || node.data.visible !== false" class="fa fa-eye"></i>
             <i v-if="node.data && node.data.visible === false" class="fa fa-eye-slash"></i>
           </span>
+        </template>
+
+
+        <template slot="draginfo">
+          {{selectedNodesTitle}}
         </template>
 
       </sl-vue-tree>
@@ -113,7 +119,8 @@
      return {
        nodes: nodes,
        contextMenuIsVisible: false,
-       lastEvent: 'No last event'
+       lastEvent: 'No last event',
+       selectedNodesTitle: '',
      }
     },
 
@@ -133,7 +140,8 @@
       },
 
       nodeSelected(nodes, event) {
-        this.lastEvent = `Select nodes: ${nodes.map(node => node.title).join(', ')}`;
+        this.selectedNodesTitle = nodes.map(node => node.title).join(', ');
+        this.lastEvent = `Select nodes: ${this.selectedNodesTitle}`;
       },
 
       nodeToggled(node, event) {

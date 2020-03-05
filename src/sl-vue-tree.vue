@@ -4,6 +4,7 @@
       :class="{'sl-vue-tree-root': isRoot }"
       @mousemove="onMousemoveHandler"
       @mouseleave="onMouseleaveHandler"
+      @dragend="onDragendHandler(null, $event)"
   >
     <div ref="nodes" class="sl-vue-tree-nodes-list">
       <div
@@ -31,6 +32,8 @@
             @contextmenu="emitNodeContextmenu(node, $event)"
             @dblclick="emitNodeDblclick(node, $event)"
             @click="emitNodeClick(node, $event)"
+            @dragover="onExternalDragoverHandler(node, $event)"
+            @drop="onExternalDropHandler(node, $event)"
             :path="node.pathStr"
             :class="{
             'sl-vue-tree-cursor-hover':
@@ -68,6 +71,10 @@
           </span>
 
             <slot name="title" :node="node">{{ node.title }}</slot>
+            
+            <slot name="empty-node" :node="node" v-if="!node.isLeaf && node.children.length == 0 && node.isExpanded">
+            </slot>
+
           </div>
 
           <div class="sl-vue-tree-sidebar">
@@ -82,6 +89,7 @@
             :level="node.level"
             :parentInd="nodeInd"
             :allowMultiselect="allowMultiselect"
+            :allowToggleBranch="allowToggleBranch"
             :edgeSize="edgeSize"
             :showBranches="showBranches"
             @dragover.prevent
@@ -100,6 +108,11 @@
 
           <template slot="sidebar" slot-scope="{ node }">
             <slot name="sidebar" :node="node"></slot>
+          </template>
+          
+          <template slot="empty-node" slot-scope="{ node }">
+            <slot name="empty-node" :node="node" v-if="!node.isLeaf && node.children.length == 0 && node.isExpanded">
+            </slot>
           </template>
 
         </sl-vue-tree>
@@ -121,7 +134,7 @@
 
       </div>
 
-      <div v-show="isDragging" ref="dragInfo" class="sl-vue-tree-drag-info">
+      <div v-show="isDragging" v-if="isRoot" ref="dragInfo" class="sl-vue-tree-drag-info">
         <slot name="draginfo">
           Items: {{selectionSize}}
         </slot>
